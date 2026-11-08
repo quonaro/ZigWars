@@ -23,7 +23,7 @@ export const zigLanguage = StreamLanguage.define({
     if (stream.match(/'(?:[^'\\]|\\.)+'/)) return "character";
     if (stream.match(/\\\\[^\n]*/)) return "string"; // multiline string literal \\
 
-    if (stream.match(/@[A-Za-z_]\w*/)) return "builtin";          // @import, @intCast…
+    if (stream.match(/@[A-Za-z_]\w*/)) return "macroName";         // @import, @intCast… (tags.builtin нет)
     if (stream.match(/\$[A-Za-z_]\w*/)) return "variableName";
 
     if (stream.match(/0b[01_]+|0o[0-7_]+|0x[0-9a-fA-F_]+|\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?/))
@@ -35,7 +35,7 @@ export const zigLanguage = StreamLanguage.define({
       if (keywords.has(w)) return "keyword";
       if (typeRe.test(w)) return "typeName";
       if (/^[A-Z]/.test(w)) return "typeName";
-      if (stream.string[stream.pos] === "(") return "function";
+      if (stream.string[stream.pos] === "(") return "function(variableName)";
       return "variableName";
     }
 
