@@ -14,7 +14,7 @@
   --red:     #e07a6d;
   --mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
   --code: "JetBrains Mono", ui-monospace, "IBM Plex Mono", monospace;
-  --sans: "Golos Text", system-ui, "Segoe UI", sans-serif;
+  --sans: "Inter", system-ui, "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -140,7 +140,7 @@ button { font: inherit; }
 #out-status.bad { color: var(--red); }
 
 /* ============ Markdown ============ */
-.markdown-body { max-width: 72ch; }
+.markdown-body { max-width: 72ch; font-size: 15px; line-height: 1.7; }
 .markdown-body > p, .markdown-body > ul, .markdown-body > ol { max-width: 72ch; }
 .markdown-body h1 { font-family: var(--mono); font-size: 21px; font-weight: 700;
   margin: 0 0 14px; }

@@ -7,6 +7,7 @@ import { closeBrackets } from "https://esm.sh/@codemirror/autocomplete@6";
 import { lintGutter, setDiagnostics } from "https://esm.sh/@codemirror/lint@6";
 import { zigLanguage } from "/zig-lang.mjs";
 import { marked } from "https://esm.sh/marked@12";
+import { kataGet, kataPatch, katasAll, metaGet, metaSet } from "/db.mjs";
 
 const $ = (s) => document.querySelector(s);
 
@@ -55,11 +56,21 @@ const setDoc = (view, text) =>
 const getDoc = (view) => view.state.doc.toString();
 
 // ---------- загрузка данных ----------
+// разовый импорт старого progress.json (solved/drafts/attempts) в IndexedDB
+async function migrateProgress() {
+  if (await metaGet("migrated")) return;
+  const p = await fetch("/api/progress-export").then((r) => r.json()).catch(() => ({}));
+  for (const key of new Set([...Object.keys(p.solved || {}), ...Object.keys(p.drafts || {}), ...Object.keys(p.attempts || {})]))
+    await kataPatch(key, { draft: p.drafts?.[key], solvedAt: p.solved?.[key], attempts: p.attempts?.[key] });
+  await metaSet("migrated", 1);
+}
+
 async function loadModules() {
   const { modules } = await fetch("/api/modules").then((r) => r.json());
   state.modules = modules;
   state.flat = modules.flatMap((m) => m.katas.map((k) => ({ module: m.id, ...k })));
-  state.solvedSet = new Set(state.flat.filter((k) => k.solved).map((k) => `${k.module}/${k.dir}`));
+  const prog = await katasAll();
+  state.solvedSet = new Set(state.flat.filter((k) => prog[`${k.module}/${k.dir}`]?.solvedAt).map((k) => `${k.module}/${k.dir}`));
   renderSidebar();
   updateGlobalProgress();
 }
@@ -100,6 +111,10 @@ function updateGlobalProgress() {
 async function openKata(module, dir) {
   const data = await fetch(`/api/kata/${module}/${dir}`).then((r) => r.json());
   if (data.error) return;
+  const prog = await kataGet(`${module}/${dir}`);
+  Object.assign(data, { solved: !!prog.solvedAt, solvedAt: prog.solvedAt || null, attempts: prog.attempts || 0, draft: prog.draft || null });
+  if (data.solved && data.hasReference)
+    data.reference = (await fetch(`/api/reference/${module}/${dir}`).then((r) => r.json())).reference;
   state.current = { module, dir, data };
 
   $("#kata-kyu").textContent = `${data.meta.kyu} kyu`;
@@ -224,8 +239,7 @@ function queueDraftSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     if (!state.current) return;
-    fetch("/api/draft", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ module: state.current.module, kata: state.current.dir, solution: getDoc(edSolution) }) });
+    kataPatch(`${state.current.module}/${state.current.dir}`, { draft: getDoc(edSolution) });
   }, 1200);
 }
 edSolution.dom.addEventListener("keyup", queueDraftSave);
@@ -236,22 +250,30 @@ $("#btn-run").onclick = async () => {
   btn.disabled = true; btn.textContent = "⏳ zig test…";
   $("#out-status").textContent = "компиляция…"; $("#out-status").className = "";
   try {
+    const key = `${state.current.module}/${state.current.dir}`;
+    const solution = getDoc(edSolution);
     const r = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ module: state.current.module, kata: state.current.dir,
-        solution: getDoc(edSolution) }) }).then((x) => x.json());
+      body: JSON.stringify({ module: state.current.module, kata: state.current.dir, solution }) }).then((x) => x.json());
     renderOutput(r);
     $("#out-status").textContent = r.ok ? "пройдено" : r.kind === "compile" ? "ошибка" : "не пройдено";
     $("#out-status").className = r.ok ? "ok" : "bad";
+    const d = state.current.data;
+    const patch = { draft: solution, attempts: (d.attempts || 0) + 1 };
     if (r.ok && r.passed > 0) {
-      state.solvedSet.add(`${state.current.module}/${state.current.dir}`);
-      state.current.data.solved = true;
+      patch.solvedAt = d.solvedAt || Date.now();
+      await kataPatch(key, patch);
+      state.solvedSet.add(key);
+      d.solved = true; d.solvedAt = patch.solvedAt;
       renderSidebar(); updateGlobalProgress();
-      const d = await fetch(`/api/kata/${state.current.module}/${state.current.dir}`).then((x) => x.json());
-      if (d.reference) { state.current.data.reference = d.reference; $("#tab-reference").disabled = false; }
-      state.current.data.solvedAt = d.solvedAt;
+      if (!d.reference && d.hasReference) {
+        d.reference = (await fetch(`/api/reference/${key}`).then((x) => x.json())).reference;
+        $("#tab-reference").disabled = !d.reference;
+      }
+    } else {
+      await kataPatch(key, patch);
     }
-    state.current.data.attempts = (state.current.data.attempts || 0) + 1;
-    $("#kata-meta").textContent = renderKataMeta(state.current.data);
+    d.attempts = patch.attempts;
+    $("#kata-meta").textContent = renderKataMeta(d);
   } finally {
     btn.disabled = false; btn.textContent = "запустить тесты";
   }
@@ -260,8 +282,8 @@ $("#btn-run").onclick = async () => {
 $("#btn-reset").onclick = async () => {
   if (!state.current) return;
   if (!confirm("Сбросить решение к заготовке?")) return;
-  const r = await fetch(`/api/reset/${state.current.module}/${state.current.dir}`, { method: "POST" }).then((x) => x.json());
-  setDoc(edSolution, r.solution);
+  await kataPatch(`${state.current.module}/${state.current.dir}`, { draft: null });
+  setDoc(edSolution, state.current.data.solution);
 };
 
 // Ctrl+Enter = тест; Alt+N / Alt+P — следующая/предыдущая kata
@@ -317,5 +339,6 @@ if (typeof EventSource !== "undefined") {
   });
 }
 
+await migrateProgress();
 await loadModules();
 await route();

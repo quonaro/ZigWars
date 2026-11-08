@@ -11,11 +11,12 @@
 
 ## Архитектура
 
-- `server.mjs` — чистый `node:http`, без зависимостей. API: `/api/modules`, `/api/kata`, `/api/run`, `/api/draft`, `/api/reset`. **`/api/run` берёт `tests.zig` только с диска** — поле `tests` в payload игнорируется (тесты read-only для пользователя).
+- `server.mjs` — чистый `node:http`, без зависимостей. API: `/api/modules`, `/api/kata`, `/api/reference`, `/api/run`, `/api/progress-export`. **`/api/run` берёт `tests.zig` только с диска** — поле `tests` в payload игнорируется (тесты read-only для пользователя).
+- Прогресс пользователя — в **IndexedDB** на клиенте (`public/db.mjs`, БД `zigwars`): drafts, solvedAt, attempts. Сервер о нём ничего не знает; `/api/progress-export` отдаёт legacy `progress.json` один раз для миграции.
 - `runner.mjs` — `zig test` во временном `/tmp/zigwars-*`, таймаут 20с. **`zig test` пишет прогресс в stderr, не stdout**; статус FAIL печатается на строке ПОСЛЕ `expected X, found Y` — парсер построчный.
 - `public/` — SPA без сборки. CodeMirror 6 через esm.sh CDN + кастомный `zig-lang.mjs` (StreamLanguage). Подсветка — свой `zwHighlight` (НЕ oneDark — он тянет чужую палитру).
 - `content/mNN/SS-slug/` — kata; контракт файлов и чит-лист Zig 0.17 API — в `CONTENT_SPEC.md`. **Читай его перед добавлением/правкой kata.**
-- `progress.json` — solved + черновики пользователя. **Не трогать** — это его данные.
+- `progress.json` — legacy-файл прогресса (до миграции в IndexedDB). **Не трогать** — служит бэкапом для импорта.
 - `PROGRESS.md` — журнал разработки; дописывать значимые изменения в «Лог сессий».
 
 ## Жёсткие правила

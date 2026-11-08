@@ -1,21 +1,85 @@
-# ⚡ ZigWars
+# ⚔️ ZigWars
 
-Локальный тренажёр для изучения **Zig 0.17.x** с нуля — аналог Codewars: теория на русском + задания (kata) с реальными тестами через `zig test`.
+Локальный тренажёр для изучения **Zig 0.17.x** с нуля — аналог Codewars: теория на русском и kata с реальной проверкой через `zig test`. Работает полностью офлайн: сервер на чистом `node:http` без единой зависимости, фронтенд — SPA без сборки.
+
+![Zig](https://img.shields.io/badge/zig-0.17.x-e0a458?style=flat-square&logo=zig&logoColor=white)
+![Node](https://img.shields.io/badge/node-%E2%89%A520-3c873a?style=flat-square)
+![Kata](https://img.shields.io/badge/kata-48%20%D0%B7%D0%B0%D0%B4%D0%B0%D1%87-1b1f27?style=flat-square)
+
+## Возможности
+
+- **10 модулей, 48 kata** — от базового синтаксиса до аллокаторов, ошибок и итераторов; ранги kyu показывают сложность (8 — самые простые)
+- **Теория на русском** — каждая kata идёт с материалом на 300–800 слов, примерами кода и ссылками на официальную документацию
+- **Настоящий `zig test`** — решение гоняется компилятором во временной директории; вывод парсится построчно и показывает, какие тесты упали и почему
+- **CodeMirror 6** — редактор с подсветкой Zig и темой в стиле Codewars; запуск тестов по `Ctrl+Enter`
+- **Подсказки и эталон** — нарастающие подсказки; reference-решение открывается только после прохождения kata
+- **Прогресс в браузере** — черновики решений, отметки о прохождении и счётчик попыток хранятся в IndexedDB (`public/db.mjs`), сервер ничего о прогрессе не знает
+- **Hot-reload** — правки `public/*.css` применяются без перезагрузки, остальные файлы фронта перезагружают страницу, изменения в `content/**` подхватываются на лету (черновик в редакторе сохраняется)
+- **Скрытые тесты** — опциональный `tests_hidden.zig` гоняется после видимых и проверяет краевые случаи против хардкода
 
 ## Запуск
 
+Требования: **Zig 0.17.x** и **Node.js ≥ 20** в `PATH`.
+
 ```bash
-node server.mjs          # требуется zig 0.17 в PATH
-# открыть http://localhost:7100
+node server.mjs          # сервер на :7100
+# или через Lota task runner:
+lota dev                 # сервер + открыть браузер (node --watch)
+lota verify              # прогон всех kata (reference vs tests + ast-check стабов)
 ```
 
-## Использование
+Открыть <http://localhost:7100>.
 
-- Слева — модули и kata (kyu = сложность).
-- Центр — материал / задание / подсказка / эталонное решение (открывается после решения).
-- Справа — редакторы `solution.zig` и `tests.zig`, кнопка **ТЕСТ** (или `Ctrl+Enter`) гоняет `zig test`, вывод — ниже.
-- Прогресс и черновики — в `progress.json` (переживает перезапуск).
+## Интерфейс
+
+- **Слева** — навигация: модули и kata с рангами kyu и отметками о решении
+- **Центр** — теория → задание → подсказка → эталонное решение (после зачёта)
+- **Справа** — редактор `solution.zig` и read-only `tests.zig`, кнопка **ТЕСТ** (`Ctrl+Enter`), вывод компилятора ниже
+- **Сверху** — полоса глобального прогресса
 
 ## Добавление kata
 
-См. `CONTENT_SPEC.md`: `content/mNN/SS-slug/` с файлами meta.json / theory.md / task.md / solution.zig / reference.zig / tests.zig / hint.md. Проверка: `cp reference.zig solution.zig && zig test tests.zig` → зелёное; `zig ast-check` стаба → ок.
+Каждая kata — директория `content/mNN/SS-slug/` со строгим контрактом файлов:
+
+| Файл | Назначение |
+|---|---|
+| `meta.json` | id, заголовок, kyu, теги, время на теорию |
+| `theory.md` | материал на русском, 300–800 слов |
+| `task.md` | условие: сигнатуры, примеры вход/выход, ограничения |
+| `solution.zig` | компилируемый стаб с `// TODO` (неиспользуемые параметры сбрасывать `_ = x;`) |
+| `reference.zig` | эталонное решение |
+| `tests.zig` | 3–8 тестов `std.testing.*`, видимы ученику, но read-only |
+| `hint.md` | 1–3 подсказки нарастающей конкретности, разделённые `---` |
+| `tests_hidden.zig` | опциональные скрытые тесты на краевые случаи |
+
+Полный контракт и чит-лист API Zig 0.17 (`std.Io`, unmanaged `ArrayList`, `std.Io.Dir` и прочие ловушки) — в [`CONTENT_SPEC.md`](CONTENT_SPEC.md).
+
+После любых изменений контента — обязательно:
+
+```bash
+lota verify   # ожидаем: failures: 0
+```
+
+## Структура
+
+```
+server.mjs          — node:http сервер: API, статика, SSE hot-reload
+runner.mjs          — zig test во временной /tmp-папке (таймаут 20с)
+public/             — SPA без сборки: app.js, db.mjs (IndexedDB), zig-lang.mjs
+content/mNN/        — модули с kata
+CONTENT_SPEC.md     — спецификация контента
+PROGRESS.md         — журнал разработки
+```
+
+### API
+
+`GET /api/modules` · `GET /api/kata?id=` · `GET /api/reference?id=` · `POST /api/run` · `GET /api/progress-export` · `GET /api/dev-events` (SSE)
+
+`/api/run` берёт `tests.zig` только с диска — подменить тесты через запрос нельзя.
+
+## Стек
+
+- **Сервер:** Node.js, чистый `node:http`, ноль зависимостей
+- **Фронтенд:** ванильный JS + CodeMirror 6 (esm.sh CDN), своя StreamLanguage-грамматика Zig и подсветка `zwHighlight`
+- **Прогресс:** IndexedDB в браузере; `progress.json` — legacy-файл для разовой миграции
+- **Дизайн:** «field manual» — сине-графитовый `#1b1f27`, приглушённое золото `#e0a458`; IBM Plex Mono, Inter, JetBrains Mono

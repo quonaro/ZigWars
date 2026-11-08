@@ -1,5 +1,5 @@
 import http from "node:http";
-import { readFile, writeFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import { existsSync, watch } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,7 +8,7 @@ import { runTests } from "./runner.mjs";
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, "public");
 const CONTENT = path.join(ROOT, "content");
-const PROGRESS_FILE = path.join(ROOT, "progress.json");
+const PROGRESS_FILE = path.join(ROOT, "progress.json"); // legacy: разово отдаём клиенту для миграции в IndexedDB
 const PORT = process.env.PORT || 7100;
 
 const MIME = {
@@ -20,10 +20,7 @@ const MIME = {
 
 async function loadProgress() {
   try { return JSON.parse(await readFile(PROGRESS_FILE, "utf8")); }
-  catch { return { solved: {}, drafts: {} }; }
-}
-async function saveProgress(p) {
-  await writeFile(PROGRESS_FILE, JSON.stringify(p, null, 2));
+  catch { return null; }
 }
 
 // Сканирует content/: модули → kata (сортирует по имени каталога)
@@ -100,11 +97,12 @@ const server = http.createServer(async (req, res) => {
   try {
     // ---------- API ----------
     if (p === "/api/modules") {
-      const progress = await loadProgress();
-      const modules = await scanContent();
-      for (const m of modules)
-        for (const k of m.katas) k.solved = !!progress.solved[`${m.id}/${k.dir}`];
-      return json(res, 200, { modules });
+      return json(res, 200, { modules: await scanContent() });
+    }
+
+    // разовая выгрузка legacy progress.json → клиент импортирует в IndexedDB
+    if (p === "/api/progress-export") {
+      return json(res, 200, (await loadProgress()) || {});
     }
 
     const kataMatch = p.match(/^\/api\/kata\/([\w-]+)\/([\w-]+)$/);
@@ -112,19 +110,23 @@ const server = http.createServer(async (req, res) => {
       const [, mod, kataDir] = kataMatch;
       const files = await kataFiles(mod, kataDir);
       if (!files.meta.id) return json(res, 404, { error: "kata not found" });
-      const progress = await loadProgress();
-      const key = `${mod}/${kataDir}`;
       return json(res, 200, {
         module: mod, dir: kataDir, ...files,
         testsHidden: undefined,
         hasHidden: !!files.testsHidden,
-        solved: !!progress.solved[key],
-        solvedAt: progress.solved[key] || null,
-        attempts: progress.attempts?.[key] || 0,
-        draft: progress.drafts[key] || null,
-        // эталон отдаём только если решено (как "unlock solutions" на codewars)
-        reference: progress.solved[key] ? files.reference : null,
+        hasReference: !!files.reference,
+        // прогресс живёт на клиенте (IndexedDB) — эталон отдаём отдельным эндпоинтом
+        reference: undefined,
       });
+    }
+
+    // эталонное решение; "unlock" реализован на клиенте — локальный тренажёр, читерить бессмысленно
+    const refMatch = p.match(/^\/api\/reference\/([\w-]+)\/([\w-]+)$/);
+    if (refMatch && req.method === "GET") {
+      const [, mod, kataDir] = refMatch;
+      const files = await kataFiles(mod, kataDir);
+      if (!files.meta.id) return json(res, 404, { error: "kata not found" });
+      return json(res, 200, { reference: files.reference });
     }
 
     if (p === "/api/run" && req.method === "POST") {
@@ -134,36 +136,7 @@ const server = http.createServer(async (req, res) => {
       // тесты берём ТОЛЬКО с диска — пользовательские правки не принимаем
       const { tests, testsHidden } = await kataFiles(mod, kata);
       if (!tests) return json(res, 400, { error: "kata tests not found" });
-      const result = await runTests(solution, tests, { hiddenSrc: testsHidden || null });
-
-      const progress = await loadProgress();
-      const key = `${mod}/${kata}`;
-      if (mod && kata) {
-        progress.drafts[key] = solution;
-        progress.attempts = progress.attempts || {};
-        progress.attempts[key] = (progress.attempts[key] || 0) + 1;
-        if (result.ok && result.kind === "tests" && result.passed > 0) progress.solved[key] = Date.now();
-        await saveProgress(progress);
-      }
-      return json(res, 200, result);
-    }
-
-    if (p === "/api/draft" && req.method === "POST") {
-      const { module: mod, kata, solution } = await readBody(req);
-      const progress = await loadProgress();
-      progress.drafts[`${mod}/${kata}`] = solution;
-      await saveProgress(progress);
-      return json(res, 200, { ok: true });
-    }
-
-    const stubMatch = p.match(/^\/api\/reset\/([\w-]+)\/([\w-]+)$/);
-    if (stubMatch && req.method === "POST") {
-      const [, mod, kataDir] = stubMatch;
-      const files = await kataFiles(mod, kataDir);
-      const progress = await loadProgress();
-      delete progress.drafts[`${mod}/${kataDir}`];
-      await saveProgress(progress);
-      return json(res, 200, { solution: files.solution });
+      return json(res, 200, await runTests(solution, tests, { hiddenSrc: testsHidden || null }));
     }
 
     if (p === "/api/dev-events") {
