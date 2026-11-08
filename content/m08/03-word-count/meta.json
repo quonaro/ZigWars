@@ -1,0 +1,7 @@
+{
+  "id": "m08-03",
+  "title": "StringHashMap: считаем уникальные слова",
+  "kyu": 6,
+  "tags": ["StringHashMap", "хеш-таблица", "токенизация"],
+  "theory_minutes": 15
+}

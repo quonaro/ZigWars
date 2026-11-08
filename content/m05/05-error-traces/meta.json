@@ -1,0 +1,7 @@
+{
+  "id": "m05-05",
+  "title": "Error return trace и файлы",
+  "kyu": 5,
+  "tags": ["errors", "trace", "std.Io"],
+  "theory_minutes": 18
+}

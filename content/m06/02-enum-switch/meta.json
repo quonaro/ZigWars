@@ -1,0 +1,7 @@
+{
+  "id": "m06-02",
+  "title": "Роза ветров: enum и switch",
+  "kyu": 7,
+  "tags": ["enum", "switch", "@intFromEnum"],
+  "theory_minutes": 12
+}

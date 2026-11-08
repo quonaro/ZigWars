@@ -1,0 +1,7 @@
+{
+  "id": "m05-01",
+  "title": "Первая ошибка",
+  "kyu": 7,
+  "tags": ["errors", "error-set", "try"],
+  "theory_minutes": 15
+}

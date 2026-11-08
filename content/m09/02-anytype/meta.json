@@ -1,0 +1,7 @@
+{
+  "id": "m09-02",
+  "title": "anytype и @TypeOf — утиная типизация",
+  "kyu": 7,
+  "tags": ["anytype", "@TypeOf", "дженерики"],
+  "theory_minutes": 10
+}

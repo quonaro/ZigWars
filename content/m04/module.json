@@ -1,0 +1,4 @@
+{
+  "title": "Модуль 4 · Optionals — жизнь без null",
+  "description": "Тип ?T, null, orelse, захват |v| — как в Zig живут без null-указателей и почему это фича."
+}

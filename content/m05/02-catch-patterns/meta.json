@@ -1,0 +1,7 @@
+{
+  "id": "m05-02",
+  "title": "Паттерны catch",
+  "kyu": 7,
+  "tags": ["errors", "catch", "parseInt"],
+  "theory_minutes": 12
+}

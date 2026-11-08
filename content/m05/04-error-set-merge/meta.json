@@ -1,0 +1,7 @@
+{
+  "id": "m05-04",
+  "title": "Объединение error sets",
+  "kyu": 6,
+  "tags": ["errors", "error-set", "anyerror"],
+  "theory_minutes": 15
+}

@@ -1,0 +1,7 @@
+{
+  "id": "m01-04",
+  "title": "Зажим значения (clamp)",
+  "kyu": 7,
+  "tags": ["if-выражение", "builtin"],
+  "theory_minutes": 8
+}

@@ -1,0 +1,7 @@
+{
+  "id": "m07-05",
+  "title": "DebugAllocator и выбор аллокатора",
+  "kyu": 5,
+  "tags": ["DebugAllocator", "GPA", "стратегии", "realloc"],
+  "theory_minutes": 20
+}

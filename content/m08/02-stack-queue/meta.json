@@ -1,0 +1,7 @@
+{
+  "id": "m08-02",
+  "title": "Стек на ArrayList: обратная польская нотация",
+  "kyu": 6,
+  "tags": ["стек", "pop", "parseInt", "RPN"],
+  "theory_minutes": 15
+}

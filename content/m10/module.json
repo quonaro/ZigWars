@@ -1,0 +1,4 @@
+{
+  "title": "Модуль 10 · std.Io, файлы и сборка",
+  "description": "std.Io в Zig 0.17: файлы через Dir, Writer-интерфейсы, ZON и структура build.zig."
+}

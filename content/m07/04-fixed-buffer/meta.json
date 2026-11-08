@@ -1,0 +1,7 @@
+{
+  "id": "m07-04",
+  "title": "Буфер на стеке: аллокация без кучи",
+  "kyu": 6,
+  "tags": ["FixedBufferAllocator", "стек", "embedded"],
+  "theory_minutes": 12
+}

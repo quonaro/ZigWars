@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZigWars — учим Zig с нуля</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>⚡</text></svg>">
+</head>
+<body>
+<header id="topbar">
+  <div class="brand"><b>zigwars</b><span class="ver">zig 0.17</span></div>
+  <div id="kata-title-wrap">
+    <span id="kata-kyu" class="kyu"></span>
+    <span id="kata-title">—</span>
+    <span id="kata-meta"></span>
+  </div>
+  <div class="top-right">
+    <div id="progress-bar"><i></i></div>
+    <span id="global-progress"></span>
+  </div>
+</header>
+
+<div id="layout">
+  <!-- Навигация: модули и kata -->
+  <nav id="sidebar"><div class="loading">Загрузка…</div></nav>
+
+  <!-- Материал + условие -->
+  <section id="docs">
+    <div class="tabs">
+      <button class="tab active" data-tab="theory">материал</button>
+      <button class="tab" data-tab="task">задание</button>
+      <button class="tab" data-tab="hint">подсказка</button>
+      <button class="tab" data-tab="reference" id="tab-reference" disabled>эталон</button>
+    </div>
+    <div id="doc-content" class="markdown-body"></div>
+    <div id="docs-nav">
+      <button id="btn-prev">← назад</button>
+      <button id="btn-next">дальше →</button>
+    </div>
+  </section>
+
+  <!-- Редакторы + вывод -->
+  <section id="work">
+    <div class="pane-head"><span>решение</span><span class="pane-hint">solution.zig</span></div>
+    <div id="editor-solution" class="editor"></div>
+    <div class="pane-head"><span>тесты</span><span class="pane-hint">tests.zig · read-only</span></div>
+    <div id="editor-tests" class="editor editor-tests"></div>
+    <div id="actions">
+      <button id="btn-run" class="primary">запустить тесты</button>
+      <button id="btn-reset">сброс</button>
+    </div>
+    <div class="pane-head"><span>вывод</span><span id="out-status"></span></div>
+    <div id="output"><div class="out-empty">Нажми «запустить тесты» или Ctrl+Enter.</div></div>
+  </section>
+</div>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>

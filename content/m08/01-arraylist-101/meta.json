@@ -1,0 +1,7 @@
+{
+  "id": "m08-01",
+  "title": "ArrayList: список с явным аллокатором",
+  "kyu": 7,
+  "tags": ["ArrayList", "unmanaged", "append", "toOwnedSlice"],
+  "theory_minutes": 15
+}

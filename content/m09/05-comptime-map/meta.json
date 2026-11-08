@@ -1,0 +1,7 @@
+{
+  "id": "m09-05",
+  "title": "Comptime-таблицы и стражи @compileError",
+  "kyu": 5,
+  "tags": ["comptime", "таблицы", "@compileError", "вариативность"],
+  "theory_minutes": 12
+}

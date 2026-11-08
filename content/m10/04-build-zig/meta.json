@@ -1,0 +1,7 @@
+{
+  "id": "m10-04",
+  "title": "build.zig и ZON: сборка как данные",
+  "kyu": 4,
+  "tags": ["build.zig", "zon", "std.zon.parse", "сборка"],
+  "theory_minutes": 15
+}

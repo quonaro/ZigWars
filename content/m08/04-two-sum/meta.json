@@ -1,0 +1,7 @@
+{
+  "id": "m08-04",
+  "title": "Two Sum за O(n) на AutoHashMap",
+  "kyu": 5,
+  "tags": ["AutoHashMap", "getOrPut", "алгоритмы"],
+  "theory_minutes": 15
+}

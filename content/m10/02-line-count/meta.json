@@ -1,0 +1,7 @@
+{
+  "id": "m10-02",
+  "title": "Считаем строки: чтение vs стриминг",
+  "kyu": 5,
+  "tags": ["std.Io", "файлы", "std.mem.count", "tokenize"],
+  "theory_minutes": 12
+}

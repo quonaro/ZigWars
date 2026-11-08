@@ -1,0 +1,7 @@
+{
+  "id": "m05-03",
+  "title": "errdefer — откат по ошибке",
+  "kyu": 6,
+  "tags": ["errors", "errdefer", "defer"],
+  "theory_minutes": 12
+}

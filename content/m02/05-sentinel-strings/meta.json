@@ -1,0 +1,7 @@
+{
+  "id": "m02-05",
+  "title": "Строки с сентинелом",
+  "kyu": 6,
+  "tags": ["sentinel", "[*:0]", "C-интероп", "std.mem.span"],
+  "theory_minutes": 14
+}

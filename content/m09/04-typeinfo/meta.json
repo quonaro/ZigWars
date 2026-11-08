@@ -1,0 +1,7 @@
+{
+  "id": "m09-04",
+  "title": "@typeInfo — рефлексия по типам",
+  "kyu": 5,
+  "tags": ["@typeInfo", "рефлексия", "comptime"],
+  "theory_minutes": 12
+}

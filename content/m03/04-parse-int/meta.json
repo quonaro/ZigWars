@@ -1,0 +1,7 @@
+{
+  "id": "m03-04",
+  "title": "Парсим число",
+  "kyu": 7,
+  "tags": ["строки", "std.fmt", "ошибки", "parseInt"],
+  "theory_minutes": 12
+}

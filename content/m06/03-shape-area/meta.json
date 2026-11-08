@@ -1,0 +1,7 @@
+{
+  "id": "m06-03",
+  "title": "Площадь фигуры: tagged union",
+  "kyu": 6,
+  "tags": ["union(enum)", "switch", "захват payload"],
+  "theory_minutes": 12
+}

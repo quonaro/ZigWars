@@ -1,0 +1,7 @@
+{
+  "id": "m07-01",
+  "title": "Выделяем и дублируем",
+  "kyu": 7,
+  "tags": ["аллокатор", "dupe", "free", "defer"],
+  "theory_minutes": 15
+}

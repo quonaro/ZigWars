@@ -1,0 +1,38 @@
+dev:
+  desc: Сервер + открыть браузер на :7100
+  color: green
+  script: |
+    (sleep 1 && xdg-open http://localhost:7100 >/dev/null 2>&1 &)
+    exec node --watch server.mjs
+
+run:
+  desc: Запустить сервер на :7100
+  color: green
+  script: node server.mjs
+
+verify:
+  desc: "Прогнать все kata: reference против tests.zig и tests_hidden.zig + ast-check стабов"
+  color: yellow
+  script: |
+    set -u
+    fail=0; total=0
+    for k in content/m*/*/; do
+      [ -f "$k/reference.zig" ] || continue
+      total=$((total+1))
+      cp "$k/solution.zig" /tmp/zw_stub.zig
+      cp "$k/reference.zig" "$k/solution.zig"
+      out=$(cd "$k" && timeout 25 zig test tests.zig 2>&1 | tail -1)
+      hid=ok
+      if [ -f "$k/tests_hidden.zig" ]; then
+        hout=$(cd "$k" && timeout 25 zig test tests_hidden.zig 2>&1 | tail -1)
+        echo "$hout" | grep -q "passed" || hid="FAIL: $hout"
+      fi
+      cp /tmp/zw_stub.zig "$k/solution.zig"
+      stub=$(cd "$k" && zig ast-check solution.zig 2>/dev/null && echo ok || echo FAIL)
+      if ! echo "$out" | grep -q "passed"; then fail=$((fail+1)); echo "FAIL tests: $k"; fi
+      if [ "$hid" != "ok" ]; then fail=$((fail+1)); echo "FAIL hidden: $k — $hid"; fi
+      if [ "$stub" = "FAIL" ]; then fail=$((fail+1)); echo "FAIL stub: $k"; fi
+    done
+    echo "---"
+    echo "kata: $total, failures: $fail"
+    [ "$fail" -eq 0 ]

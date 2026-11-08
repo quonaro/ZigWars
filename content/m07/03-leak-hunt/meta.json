@@ -1,0 +1,7 @@
+{
+  "id": "m07-03",
+  "title": "Охота на утечку",
+  "kyu": 6,
+  "tags": ["утечки", "errdefer", "defer", "testing.allocator"],
+  "theory_minutes": 15
+}

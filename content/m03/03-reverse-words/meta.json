@@ -1,0 +1,7 @@
+{
+  "id": "m03-03",
+  "title": "Слова задом наперёд",
+  "kyu": 7,
+  "tags": ["строки", "аллокатор", "tokenize", "ArrayList"],
+  "theory_minutes": 15
+}

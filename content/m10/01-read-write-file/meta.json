@@ -1,0 +1,7 @@
+{
+  "id": "m10-01",
+  "title": "std.Io и файлы: читаем, меняем, пишем",
+  "kyu": 6,
+  "tags": ["std.Io", "файлы", "Dir", "readFileAlloc"],
+  "theory_minutes": 15
+}

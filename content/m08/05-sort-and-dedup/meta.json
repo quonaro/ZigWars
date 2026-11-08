@@ -1,0 +1,7 @@
+{
+  "id": "m08-05",
+  "title": "Сортировка и дедупликация",
+  "kyu": 5,
+  "tags": ["std.mem.sort", "компаратор", "realloc", "dedup"],
+  "theory_minutes": 15
+}

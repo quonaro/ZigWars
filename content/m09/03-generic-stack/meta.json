@@ -1,0 +1,7 @@
+{
+  "id": "m09-03",
+  "title": "Дженерик-стек: функция, возвращающая тип",
+  "kyu": 6,
+  "tags": ["дженерики", "comptime T: type", "ArrayList"],
+  "theory_minutes": 12
+}

@@ -1,0 +1,7 @@
+{
+  "id": "m10-03",
+  "title": "std.Io.Writer: собираем таблицу в строку",
+  "kyu": 5,
+  "tags": ["std.Io.Writer", "Allocating", "print", "форматирование"],
+  "theory_minutes": 12
+}
